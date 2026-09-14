@@ -17,13 +17,13 @@ describe('SqljsInitializer', () => {
         fs.rmSync(temporaryDir, { recursive: true, force: true });
     });
 
+    // #5322: another worker creates the shared data directory just before this worker's mkdir
     it('populates when another worker creates the directory just before mkdir', async () => {
         const dataDir = path.join(temporaryDir, 'data');
         const initializer = new SqljsInitializer(dataDir);
         const options = await initializer.init('first.spec.ts', { type: 'sqljs' });
         const mkdir = fs.mkdirSync;
-        vi.spyOn(fs, 'mkdirSync').mockImplementationOnce((directory, mkdirOptions) => {
-            // #5322: another worker wins the race after the missing-directory check.
+        const mkdirSpy = vi.spyOn(fs, 'mkdirSync').mockImplementationOnce((directory, mkdirOptions) => {
             mkdir(directory, { recursive: true });
             return mkdir(directory, mkdirOptions);
         });
@@ -35,6 +35,7 @@ describe('SqljsInitializer', () => {
 
         await initializer.populate(populate);
 
+        expect(mkdirSpy).toHaveBeenCalledOnce();
         expect(populate).toHaveBeenCalledOnce();
         expect(options.autoSave).toBe(false);
         expect(options.synchronize).toBe(false);
