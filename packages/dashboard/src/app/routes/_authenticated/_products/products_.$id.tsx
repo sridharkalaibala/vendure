@@ -312,18 +312,27 @@ function ProductDetailPage() {
                 )}
                 {entity && entity.optionGroups.length > 0 && (
                     <PageBlock column="side" blockId="option-groups" title={<Trans>Product Options</Trans>}>
-                        <div className="space-y-3 mb-3">
-                            {entity.optionGroups.map(g => (
-                                <div key={g.id} className="space-y-2">
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                            {entity.optionGroups.map(g => {
+                                const badge = (
                                     <ProductOptionGroupBadge
+                                        key={g.id}
                                         id={g.id}
                                         name={g.name}
                                         productId={entity.id}
                                         onRemoved={() => refreshEntity()}
                                     />
-                                    <SharedOptionGroupWarning productCount={g.productCount} />
-                                </div>
-                            ))}
+                                );
+                                // A shared group takes a full row so its warning sits next to its name
+                                return g.productCount > 1 ? (
+                                    <div key={g.id} className="w-full space-y-2">
+                                        {badge}
+                                        <SharedOptionGroupWarning productCount={g.productCount} />
+                                    </div>
+                                ) : (
+                                    badge
+                                );
+                            })}
                         </div>
                         <AddOptionGroupDialog
                             productId={entity.id}
