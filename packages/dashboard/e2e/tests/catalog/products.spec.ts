@@ -218,7 +218,7 @@ for (const productCount of [0, 1, 2]) {
                     cleanupErrors.push(error);
                 }
             }
-            expect(cleanupErrors, 'Fixture cleanup failures').toEqual([]);
+            expect.soft(cleanupErrors, 'Fixture cleanup failures').toEqual([]);
         }
     });
 }
